@@ -1,27 +1,287 @@
-import { nav } from "../data/content.js";
+import { useState, useEffect, useRef } from "react";
+import { useLanguage } from "./LanguageContext.jsx";
 
-function BrandMark() {
-  return (
-    
-   <img src="data:image/png;base64,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" 
-   alt="logo alovhaiti" width={130} border-radius="50%" />
-  );
-}
+export default function Header({ onOpenDonate }) {
+  const { lang, setLang, t } = useLanguage();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const dropdownRef = useRef(null);
 
-export default function Header() {
+  const headerT = t.header || {
+    location: "Haïti",
+    utilityMessage: "Ensemble, renforçons les communautés.",
+    contactQuick: "Contact",
+    moreMenu: "Plus",
+    menuAria: "Ouvrir le menu",
+    closeMenuAria: "Fermer le menu",
+    langAria: "Langue",
+  };
+
+  const allNav = t.nav || [];
+  // Primary links to show directly in desktop navigation
+  const primaryNav = allNav.filter((_, index) => [0, 1, 2, 3, 4, allNav.length - 1].includes(index));
+  const moreNav = allNav.filter((_, index) => ![0, 1, 2, 3, 4, allNav.length - 1].includes(index));
+
+  // Detect scroll for sticky header elevation
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close mobile drawer on Escape key and manage scroll locking
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
+        setDropdownOpen(false);
+      }
+    };
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [mobileMenuOpen]);
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
-    <header className="site-header">
-      <div className="wrap">
-        <a href="#top" className="brand">
-          <BrandMark />
-        </a>
-        <nav className="main-nav" aria-label="Navigation principale">
-          {nav.map((item) => (
-            <a key={item.href} href={item.href}>
-              {item.label}
+    <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
+      {/* Main Header Bar */}
+      <div className="header-main">
+        <div className="wrap header-wrap">
+          {/* Brand / Logo */}
+          <a href="#top" className="brand" aria-label="MAKAYA - Accueil">
+            <img
+              src={`${import.meta.env.BASE_URL}makaya-logo.png`}
+              alt="Logo MAKAYA"
+              className="brand-mark-img"
+              width="135"
+              height="44"
+            />
+          </a>
+
+          {/* Desktop Navigation matching the mockup */}
+          <nav className="main-nav" aria-label="Navigation principale">
+            {primaryNav.map((item, idx) => (
+              <a
+                key={`${item.label}-${item.href}`}
+                href={item.href}
+                className={`nav-link ${idx === 0 ? "active" : ""}`}
+              >
+                {item.label}
+              </a>
+            ))}
+
+            {/* Dropdown for extra links */}
+            {moreNav.length > 0 && (
+              <div className="nav-dropdown" ref={dropdownRef}>
+                <button
+                  type="button"
+                  className={`nav-link nav-dropdown-btn ${dropdownOpen ? "active" : ""}`}
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  aria-expanded={dropdownOpen}
+                  aria-haspopup="true"
+                >
+                  <span>{headerT.moreMenu}</span>
+                  <span className="material-symbols-rounded dropdown-icon" aria-hidden="true">
+                    expand_more
+                  </span>
+                </button>
+
+                {dropdownOpen && (
+                  <div className="dropdown-menu" role="menu">
+                    {moreNav.map((item) => (
+                      <a
+                        key={`${item.label}-${item.href}`}
+                        href={item.href}
+                        role="menuitem"
+                        className="dropdown-item"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </nav>
+
+          {/* Header Right Actions */}
+          <div className="header-actions">
+            {/* Search Icon Trigger */}
+            <a href="#programmes" className="header-search-btn" aria-label="Rechercher">
+              <span className="material-symbols-rounded">search</span>
+            </a>
+
+            {/* Language Switcher */}
+            <div className="lang-switcher" role="group" aria-label={headerT.langAria}>
+              <button
+                type="button"
+                className={`lang-btn ${lang === "fr" ? "active" : ""}`}
+                onClick={() => setLang("fr")}
+                title="Français"
+                aria-pressed={lang === "fr"}
+              >
+                FR
+              </button>
+              <button
+                type="button"
+                className={`lang-btn ${lang === "ht" ? "active" : ""}`}
+                onClick={() => setLang("ht")}
+                title="Kreyòl Ayisyen"
+                aria-pressed={lang === "ht"}
+              >
+                HT
+              </button>
+              <button
+                type="button"
+                className={`lang-btn ${lang === "en" ? "active" : ""}`}
+                onClick={() => setLang("en")}
+                title="English"
+                aria-pressed={lang === "en"}
+              >
+                EN
+              </button>
+            </div>
+
+            {/* Donate CTA Button (Solar Yellow matching mockup) */}
+            <button
+              type="button"
+              className="donate-header-btn"
+              onClick={onOpenDonate}
+              aria-label={t.hero.primaryCta}
+            >
+              <span>{t.hero.primaryCta}</span>
+            </button>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              type="button"
+              className={`mobile-menu-btn ${mobileMenuOpen ? "is-open" : ""}`}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? headerT.closeMenuAria : headerT.menuAria}
+              aria-expanded={mobileMenuOpen}
+            >
+              <span className="material-symbols-rounded" aria-hidden="true">
+                {mobileMenuOpen ? "close" : "menu"}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Drawer & Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="mobile-overlay"
+          onClick={closeMobileMenu}
+          aria-hidden="true"
+        />
+      )}
+
+      <div
+        className={`mobile-drawer ${mobileMenuOpen ? "is-open" : ""}`}
+        aria-hidden={!mobileMenuOpen}
+      >
+        <div className="mobile-drawer-header">
+          <a href="#top" className="brand" onClick={closeMobileMenu}>
+            <img
+              src={`${import.meta.env.BASE_URL}makaya-logo.png`}
+              alt="Logo MAKAYA"
+              className="brand-mark-img mobile-brand-img"
+            />
+          </a>
+          <button
+            type="button"
+            className="mobile-drawer-close"
+            onClick={closeMobileMenu}
+            aria-label={headerT.closeMenuAria}
+          >
+            <span className="material-symbols-rounded" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <nav className="mobile-nav" aria-label="Navigation mobile">
+          {allNav.map((item) => (
+            <a
+              key={`mobile-${item.label}-${item.href}`}
+              href={item.href}
+              className="mobile-nav-link"
+              onClick={closeMobileMenu}
+            >
+              <span>{item.label}</span>
+              <span className="material-symbols-rounded arrow-icon" aria-hidden="true">
+                arrow_forward_ios
+              </span>
             </a>
           ))}
         </nav>
+
+        <div className="mobile-drawer-footer">
+          {/* Mobile Language Switcher */}
+          <div className="mobile-lang-row">
+            <span className="mobile-lang-label">{headerT.langAria} :</span>
+            <div className="lang-switcher">
+              <button
+                type="button"
+                className={`lang-btn ${lang === "fr" ? "active" : ""}`}
+                onClick={() => setLang("fr")}
+              >
+                FR
+              </button>
+              <button
+                type="button"
+                className={`lang-btn ${lang === "ht" ? "active" : ""}`}
+                onClick={() => setLang("ht")}
+              >
+                Kreyòl
+              </button>
+              <button
+                type="button"
+                className={`lang-btn ${lang === "en" ? "active" : ""}`}
+                onClick={() => setLang("en")}
+              >
+                EN
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Donate CTA */}
+          <button
+            type="button"
+            className="donate-header-btn mobile-donate-btn"
+            onClick={() => {
+              closeMobileMenu();
+              onOpenDonate();
+            }}
+          >
+            <span className="material-symbols-rounded" aria-hidden="true">favorite</span>
+            <span>{t.hero.primaryCta}</span>
+          </button>
+        </div>
       </div>
     </header>
   );

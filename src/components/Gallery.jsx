@@ -1,86 +1,70 @@
 import { useEffect, useState } from "react";
-import { gallery } from "../data/content.js";
-
-function PhotoPlaceholder({ index }) {
-  // Motif de remplacement tant qu'aucune vraie photo n'est fournie.
-  // Dès qu'une image existe, elle est utilisée automatiquement (voir Slide ci-dessous).
-  return (
-    <svg className="slide-placeholder" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <rect width="640" height="400" fill="#e8ebe3" />
-      <path d="M-20,300 C 140,200 260,360 320,280 C 400,180 520,340 660,240 L660,420 L-20,420 Z" fill="#dbe4dc" />
-      <circle cx={110 + index * 40} cy="120" r="34" fill="#c97b84" opacity="0.28" />
-      <path d="M240,250 C 300,190 340,320 420,240" fill="none" stroke="#0e4a3d" strokeWidth="2" opacity="0.35" />
-    </svg>
-  );
-}
-
-function Slide({ slide, index }) {
-  if (slide.src) {
-    return <img src={slide.src} alt={slide.alt} className="slide-photo" />;
-  }
-  return <PhotoPlaceholder index={index} />;
-}
+import { useLanguage } from "./LanguageContext.jsx";
 
 export default function Gallery() {
-  const [active, setActive] = useState(0);
-  const count = gallery.slides.length;
+  const { t } = useLanguage();
+  const galleryT = t.gallery;
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  const goTo = (i) => setActive(((i % count) + count) % count);
+  const mosaicItems = Array.from({ length: 13 }, (_, i) => ({
+    slide: galleryT.slides[i % galleryT.slides.length],
+    index: i % galleryT.slides.length,
+  }));
 
-  useEffect(function () {
-    const onKey = (e) => {
-      if (e.key === "ArrowRight") goTo(active + 1);
-      if (e.key === "ArrowLeft") goTo(active - 1);
+  useEffect(() => {
+    const onKey = (event) => {
+      if (lightboxIndex === null) return;
+      if (event.key === "Escape") setLightboxIndex(null);
+      if (event.key === "ArrowRight") setLightboxIndex((lightboxIndex + 1) % galleryT.slides.length);
+      if (event.key === "ArrowLeft") setLightboxIndex((lightboxIndex - 1 + galleryT.slides.length) % galleryT.slides.length);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [active]);
+  }, [lightboxIndex, galleryT.slides.length]);
 
   return (
     <section className="gallery" id="galerie">
-      <div className="wrap">
-        <div className="section-head reveal">
-          <p className="eyebrow">{gallery.eyebrow}</p>
-          <h2>{gallery.title}</h2>
-          <p className="section-lead">{gallery.text}</p>
+      <div className="gallery-shell reveal">
+        <div className="gallery-topline">
+          <p className="gallery-mark">✳ <span>MAKAYA</span></p>
+          <a href="#contact">Nous contacter <span className="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a>
         </div>
 
-        <div className="slideshow reveal" role="region" aria-roledescription="carrousel" aria-label="Photos de nos activités">
-          <div className="slide-frame">
-            {gallery.slides.map((slide, i) => (
-              <div
-                className={`slide ${i === active ? "is-active" : ""}`}
-                key={slide.caption}
-                aria-hidden={i !== active}
-              >
-                <Slide slide={slide} index={i} />
-              </div>
-            ))}
-
-            <button className="slide-nav prev" onClick={() => goTo(active - 1)} aria-label="Photo précédente">
-              ‹
+        <div className="gallery-mosaic" aria-label="Galerie de nos activités">
+          {mosaicItems.map(({ slide, index }, itemIndex) => (
+            <button
+              className={`gallery-tile tile-${itemIndex + 1}`}
+              key={`${slide.caption}-${itemIndex}`}
+              onClick={() => setLightboxIndex(index)}
+              aria-label={`Agrandir : ${slide.alt}`}
+            >
+              <img src={slide.src} alt={slide.alt} />
+              <span className="material-symbols-rounded" aria-hidden="true">zoom_in</span>
             </button>
-            <button className="slide-nav next" onClick={() => goTo(active + 1)} aria-label="Photo suivante">
-              ›
-            </button>
-          </div>
+          ))}
+        </div>
 
-          <div className="slide-footer">
-            <p className="slide-caption">{gallery.slides[active].caption}</p>
-            <div className="slide-dots">
-              {gallery.slides.map((slide, i) => (
-                <button
-                  key={slide.caption}
-                  className={`slide-dot ${i === active ? "is-active" : ""}`}
-                  onClick={() => goTo(i)}
-                  aria-label={`Aller à la photo ${i + 1}`}
-                  aria-current={i === active}
-                />
-              ))}
-            </div>
+        <div className="gallery-bottomline">
+          <h2><span>Nos</span> instants<br />partagés</h2>
+          <div>
+            <p>{galleryT.lead}</p>
+            <a className="gallery-cta" href="#contact">Découvrir nos actions <span className="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a>
           </div>
+          <h2 className="gallery-bottom-right">au cœur des<br /><span>communautés</span></h2>
         </div>
       </div>
+
+      {lightboxIndex !== null && (
+        <div className="lightbox-backdrop" onClick={() => setLightboxIndex(null)}>
+          <div className="lightbox-modal" onClick={(event) => event.stopPropagation()}>
+            <button className="lightbox-close" onClick={() => setLightboxIndex(null)} aria-label="Fermer"><span className="material-symbols-rounded" aria-hidden="true">close</span></button>
+            <img src={galleryT.slides[lightboxIndex].src} alt={galleryT.slides[lightboxIndex].alt} className="lightbox-img" />
+            <div className="lightbox-caption"><p>{galleryT.slides[lightboxIndex].caption}</p></div>
+            <button className="lightbox-nav prev" onClick={() => setLightboxIndex((lightboxIndex - 1 + galleryT.slides.length) % galleryT.slides.length)} aria-label="Photo précédente"><span className="material-symbols-rounded" aria-hidden="true">arrow_back</span></button>
+            <button className="lightbox-nav next" onClick={() => setLightboxIndex((lightboxIndex + 1) % galleryT.slides.length)} aria-label="Photo suivante"><span className="material-symbols-rounded" aria-hidden="true">arrow_forward</span></button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

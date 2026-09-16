@@ -1,6 +1,6 @@
-# Site ALOVHAITI
+# Site MAKAYA
 
-Site vitrine React (Vite) pour ALOVHAITI — sensibilisation à la santé bucco-dentaire.
+Site vitrine React (Vite) pour MAKAYA — sensibilisation à la santé bucco-dentaire.
 
 ## Démarrer en local
 

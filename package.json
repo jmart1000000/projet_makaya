@@ -1,7 +1,8 @@
 {
-  "name": "alovhaiti-site",
+  "name": "makaya-site",
   "private": true,
   "version": "0.1.0",
+  "homepage": "https://jmart1000000.github.io/projet_makaya/",
   "type": "module",
   "scripts": {
     "dev": "vite",

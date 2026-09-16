@@ -1,38 +1,56 @@
-import { pillars } from "../data/content.js";
-
-const icons = {
-  Sensibiliser: (
-    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <path d="M20 6 L20 14 M20 26 L20 34 M6 20 L14 20 M26 20 L34 20" stroke="#0e4a3d" strokeWidth="1.6" strokeLinecap="round" />
-      <circle cx="20" cy="20" r="6" stroke="#c97b84" strokeWidth="1.6" />
-    </svg>
-  ),
-  Former: (
-    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <path d="M6 14 L20 8 L34 14 L20 20 Z" stroke="#0e4a3d" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M12 18 V27 C12 30 27 30 27 27 V18" stroke="#c97b84" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  ),
-  Outiller: (
-    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <rect x="8" y="16" width="24" height="16" rx="3" stroke="#0e4a3d" strokeWidth="1.6" />
-      <path d="M14 16 V12 C14 9 26 9 26 12 V16" stroke="#c97b84" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  ),
-};
+import { useLanguage } from "./LanguageContext.jsx";
 
 export default function Pillars() {
+  const { t } = useLanguage();
+  const pillarsT = t.pillars;
+  const pillarsTitle = t.pillarsTitle;
+
   return (
-    <section className="pillars">
+    <section className="pillars-section" id="piliers">
       <div className="wrap">
-        <div className="pillar-grid">
-          {pillars.map((p, i) => (
-            <div className="pillar-card reveal" key={p.title} style={{ transitionDelay: `${i * 90}ms` }}>
-              <div className="pillar-icon">{icons[p.title]}</div>
-              <h3>{p.title}</h3>
-              <p>{p.text}</p>
+        <div className="pillars-story-grid">
+          {/* Left Column: Story About What We Do */}
+          <div className="pillars-left-col reveal">
+            <p className="eyebrow">{pillarsTitle.eyebrow || "NOTRE MISSION"}</p>
+            <h2 className="pillars-main-title">
+              Notre histoire & <br />
+              <span className="accent-word">Nos engagements</span>
+            </h2>
+            <div className="title-accent-bar" aria-hidden="true" />
+            <p className="pillars-main-lead">
+              {pillarsTitle.lead ||
+                "MAKAYA développe des initiatives concrètes et adaptées aux réalités des communautés locales en Haïti. De l'éducation à la résilience, nous agissons pour redonner espoir et dignité aux familles."}
+            </p>
+            <p className="pillars-sub-lead">
+              Chaque programme est conçu en étroite collaboration avec les leaders et familles de terrain pour assurer un impact mesurable et durable.
+            </p>
+            <div className="pillars-cta-row">
+              <a className="btn btn-secondary" href="#programmes">
+                En savoir plus
+              </a>
+              <a className="btn btn-outline-dark" href="#contact">
+                Nous contacter
+              </a>
             </div>
-          ))}
+          </div>
+
+          {/* Right Column: 2x2 Feature Cards */}
+          <div className="pillars-right-col reveal">
+            <div className="pillars-cards-grid">
+              {pillarsT.slice(0, 4).map((pillar) => (
+                <div className="pillar-feature-card" key={pillar.id}>
+                  <div className="pillar-card-icon-wrap">
+                    <span className="material-symbols-rounded">{pillar.icon}</span>
+                  </div>
+                  <h3 className="pillar-card-title">{pillar.title}</h3>
+                  <p className="pillar-card-text">{pillar.text}</p>
+                  <a href="#programmes" className="pillar-card-link">
+                    Découvrir <span className="material-symbols-rounded">arrow_forward</span>
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
